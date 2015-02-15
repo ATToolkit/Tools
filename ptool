@@ -12,8 +12,6 @@ DEFAULT_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_BASE_DIR = os.path.normpath(os.path.join(DEFAULT_SCRIPT_DIR, ".."))
 FORMAT_EXTENSIONS = ('.m', '.h', '.mm', '.c', '.hpp', '.cpp')
 
-class StepFailedException(Exception): pass
-
 class ProjectTool:
 	def __init__(self, sort_cmd, format_cmd):
 		self.log = sys.stderr
@@ -61,9 +59,10 @@ class ProjectTool:
 
 			# List source files
 			for root, dirs, files in os.walk(srcdir):
-				for dir_exclusion in dir_exclusions[name]:
-					if dir_exclusion in dirs:
-						dirs.remove(dir_exclusion)
+				if name in dir_exclusions:
+					for dir_exclusion in dir_exclusions[name]:
+						if dir_exclusion in dirs:
+							dirs.remove(dir_exclusion)
 				for file in files:
 					if name in file_exclusions and file in file_exclusions[name]:
 						continue
@@ -129,13 +128,7 @@ if __name__ == '__main__':
 		if exclude_files:
 			file_exclusions[section] = exclude_files
 
-	try:
-		if sort_queue:
-			tool.sort_projects(sort_queue)
-		if format_queue:
-			tool.format_projects(format_queue, dir_exclusions, file_exclusions)
-	except StepFailedException as e:
-		#TODO: something
-		os.exit(1)
-		
-	
+	if sort_queue:
+		tool.sort_projects(sort_queue)
+	if format_queue:
+		tool.format_projects(format_queue, dir_exclusions, file_exclusions)
